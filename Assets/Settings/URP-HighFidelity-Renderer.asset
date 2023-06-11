@@ -53,7 +53,8 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -1878332245247344467}
-  m_RendererFeatureMap: adc0de57c6d2eee5
+  - {fileID: 4666180309626581367}
+  m_RendererFeatureMap: adc0de57c6d2eee577f136e5449ac140
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -94,3 +95,36 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &4666180309626581367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8041a15eb5765fc47a6bb4f09d936f33, type: 3}
+  m_Name: GodrayRenderPassFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  _godrayPassSettings:
+    ShowInSceneView: 0
+    RenderPassEvent: 550
+    ClearTarget: 0
+    LayerMask:
+      serializedVersion: 2
+      m_Bits: 1
+    OverrideMaterial: {fileID: 0}
+    OverrideMaterialPass: 0
+    ColorTargetDestinationID: 
+    BlitMaterial: {fileID: 2100000, guid: a4a4f63e1cd25044692be540f6d013c8, type: 2}
+    BlendRate: 1
+    GlobalAlpha: 0.942
+    FogColor: {r: 1, g: 1, b: 1, a: 1}
+    AttenuationBase: 65
+    AttenuationPower: 30.9
+    RayStep: 0.12
+    RayNearOffset: 0.01
+    RayJitterSizeX: 0.001
+    RayJitterSizeY: 0.001
