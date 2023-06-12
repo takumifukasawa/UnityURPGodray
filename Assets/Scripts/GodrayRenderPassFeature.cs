@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -34,7 +33,7 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
         [Header("Parameters")]
         [Range(0, 1)]
         public float BlendRate = 1;
-        
+
         [Range(0, 1)]
         public float GlobalAlpha = 1;
 
@@ -49,6 +48,7 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
         [Header("Ray")]
         [Range(0, 5)]
         public float RayStep;
+
         [Range(0, 5)]
         public float RayNearOffset;
 
@@ -113,7 +113,7 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
 /// </summary>
 class GodrayRenderPass : ScriptableRenderPass
 {
-    private const string PROFILER_TAG = nameof(GodrayRenderPass);
+    // private const string PROFILER_TAG = nameof(GodrayRenderPass);
 
     private Material _material;
     private RTHandle _cameraColorTarget;
@@ -124,6 +124,8 @@ class GodrayRenderPass : ScriptableRenderPass
     private FilteringSettings _filteringSettings;
     private List<ShaderTagId> _shaderTagsList = new List<ShaderTagId>();
 
+    private string _name;
+
     /// <summary>
     /// 
     /// </summary>
@@ -132,6 +134,8 @@ class GodrayRenderPass : ScriptableRenderPass
     public GodrayRenderPass(GodrayRenderPassFeature.GodrayPassSettings godrayPassSettings, string name)
     {
         _settings = godrayPassSettings;
+        _name = name;
+
         _filteringSettings = new FilteringSettings(RenderQueueRange.opaque, _settings.LayerMask);
 
         _shaderTagsList.Add(new ShaderTagId("SRPDefaultUnlit"));
@@ -193,7 +197,9 @@ class GodrayRenderPass : ScriptableRenderPass
             return;
         }
 
-        var commandBuffer = CommandBufferPool.Get(PROFILER_TAG);
+        // NOTE: mac だと空にしないと endSample でエラーになる
+        var commandBuffer = CommandBufferPool.Get();
+        // var commandBuffer = CommandBufferPool.Get(_name);
 
         using (new ProfilingScope(commandBuffer, _profilingSampler))
         {
