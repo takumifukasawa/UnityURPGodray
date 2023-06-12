@@ -123,6 +123,7 @@ Shader "Custom/Godray"
             float4x4 _InverseProjectionMatrix;
             float _RayStep;
             float _RayNearOffset;
+            float _RayBinaryStep;
             float _RayJitterSizeX;
             float _RayJitterSizeY;
             float _AttenuationBase;
@@ -204,9 +205,9 @@ Shader "Custom/Godray"
 
                 alpha = saturate(alpha);
 
-                alpha *= _GlobalAlpha;
-
                 alpha = pow(alpha, _AttenuationPower);
+
+                alpha *= _GlobalAlpha;
 
                 // float s = SAMPLE_TEXTURE2D(_MainLightShadowmapTexture, sampler_LinearRepeat, IN.uv);
                 // return float4(s, s, s, 1.);
@@ -223,5 +224,70 @@ Shader "Custom/Godray"
             }
             ENDHLSL
         }
+
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+            #if SHADER_API_GLES
+                struct GodrayAttributes
+                {
+                    float4 positionOS : POSITION;
+                    float2 uv : TEXCOORD0;
+                };
+            #else
+            struct GodrayAttributes
+            {
+                uint vertexID : SV_VertexID;
+            };
+            #endif
+
+            struct GodrayVaryings
+            {
+                float2 uv : TEXCOORD0;
+                float4 positionHCS : SV_POSITION;
+            };
+
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+            TEXTURE2D(_CameraDepthTexture);
+            SAMPLER(sample_CameraDepthTexture);
+
+            CBUFFER_START(UnityPerMaterial)
+            float4 _MainTex_ST;
+            CBUFFER_END
+
+            GodrayVaryings vert(GodrayAttributes IN)
+            {
+                GodrayVaryings OUT;
+                #if SHADER_API_GLES
+                    float4 pos = input.positionOS;
+                    float2 uv  = input.uv;
+                #else
+                float4 pos = GetFullScreenTriangleVertexPosition(IN.vertexID);
+                float2 uv = GetFullScreenTriangleTexCoord(IN.vertexID);
+                #endif
+
+                OUT.positionHCS = pos;
+                OUT.uv = uv;
+                return OUT;
+            }
+
+
+            half4 frag(GodrayVaryings IN) : SV_Target
+            {
+                half4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
+                float g = (col.x + col.y + col.z) * .333;
+                return half4(g, g, g, 1);
+            }
+            ENDHLSL
+        }
+
     }
 }

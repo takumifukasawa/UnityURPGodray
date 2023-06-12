@@ -47,10 +47,10 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
 
         [Header("Ray")]
         [Range(0, 5)]
-        public float RayStep;
+        public float RayStep = 0.1f;
 
         [Range(0, 5)]
-        public float RayNearOffset;
+        public float RayNearOffset = 0.01f;
 
         [Range(0, 0.05f)]
         public float RayJitterSizeX = 0.005f;
@@ -120,7 +120,9 @@ class GodrayRenderPass : ScriptableRenderPass
     private RTHandle _cameraDepthTarget;
     private GodrayRenderPassFeature.GodrayPassSettings _settings;
     private ProfilingSampler _profilingSampler;
-    private RTHandle _rtCustomColor, _rtTempColor;
+    private RTHandle _rtCustomColor;
+    private RTHandle _rtTempColor1;
+    private RTHandle _rtTempColor2;
     private FilteringSettings _filteringSettings;
     private List<ShaderTagId> _shaderTagsList = new List<ShaderTagId>();
 
@@ -155,7 +157,8 @@ class GodrayRenderPass : ScriptableRenderPass
         var colorDesc = renderingData.cameraData.cameraTargetDescriptor;
         colorDesc.depthBufferBits = 0;
 
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor, colorDesc, name: "_TemporaryColorTexture");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, colorDesc, name: "_TemporaryColorTexture2");
 
         if (_settings.ColorTargetDestinationID != "")
         {
@@ -253,15 +256,16 @@ class GodrayRenderPass : ScriptableRenderPass
             if (_settings.BlitMaterial != null)
             {
                 var cameraTarget = renderingData.cameraData.renderer.cameraColorTargetHandle;
-                if (cameraTarget == null || _rtTempColor == null)
+                if (cameraTarget == null || _rtTempColor1 == null || _rtTempColor2 == null)
                 {
                     return;
                 }
 
                 // if (cameraTarget != null && _rtTempColor != null)
                 // {
-                Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor, _settings.BlitMaterial, 0);
-                Blitter.BlitCameraTexture(commandBuffer, _rtTempColor, cameraTarget);
+                Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor1, _settings.BlitMaterial, 0);
+                Blitter.BlitCameraTexture(commandBuffer, _rtTempColor1, _rtTempColor2, _settings.BlitMaterial, 1);
+                Blitter.BlitCameraTexture(commandBuffer, _rtTempColor2, cameraTarget);
                 // }
             }
         }
@@ -298,6 +302,7 @@ class GodrayRenderPass : ScriptableRenderPass
             _rtCustomColor?.Release();
         }
 
-        _rtTempColor?.Release();
+        _rtTempColor1?.Release();
+        _rtTempColor2?.Release();
     }
 }
