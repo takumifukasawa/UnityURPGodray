@@ -212,15 +212,21 @@ Shader "Custom/Godray"
                 // float s = SAMPLE_TEXTURE2D(_MainLightShadowmapTexture, sampler_LinearRepeat, IN.uv);
                 // return float4(s, s, s, 1.);
 
-                half4 destColor = half4(lerp(col.xyz, _FogColor.xyz, alpha), 1.);
+                // half4 destColor = half4(lerp(col.xyz, _FogColor.xyz, alpha), 1.);
+                // half4 destColor = half4(col.xyz, alpha);
+                
+                // half4 destColor = half4(_FogColor.xyz, alpha);
+                half4 destColor = half4(alpha, alpha, alpha, 1.);
 
-                return lerp(
-                    col,
-                    // half4(col.xyz, 1),
-                    // half4(alpha, alpha, alpha, 1.),
-                    destColor,
-                    _BlendRate
-                );
+                return destColor;
+
+                // return lerp(
+                //     col,
+                //     // half4(col.xyz, 1),
+                //     // half4(alpha, alpha, alpha, 1.),
+                //     destColor,
+                //     _BlendRate
+                // );
             }
             ENDHLSL
         }
@@ -258,9 +264,13 @@ Shader "Custom/Godray"
             SAMPLER(sampler_MainTex);
             TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sample_CameraDepthTexture);
+            TEXTURE2D(_GodrayTexture);
+            SAMPLER(sampler_GodrayTexture);
 
             CBUFFER_START(UnityPerMaterial)
             float4 _MainTex_ST;
+            float4 _GodrayTexture_ST;
+            float _BlendRate;
             CBUFFER_END
 
             GodrayVaryings vert(GodrayAttributes IN)
@@ -279,12 +289,20 @@ Shader "Custom/Godray"
                 return OUT;
             }
 
-
             half4 frag(GodrayVaryings IN) : SV_Target
             {
-                half4 col = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
-                float g = (col.x + col.y + col.z) * .333;
-                return half4(g, g, g, 1);
+                half4 sceneColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
+                half4 godray = SAMPLE_TEXTURE2D(_GodrayTexture, sampler_LinearRepeat, IN.uv).x;
+
+                half3 blendColor = lerp(sceneColor.xyz, godray.xyz, godray.a);
+
+                return godray;
+
+                return lerp(
+                    sceneColor,
+                    half4(blendColor, 1.),
+                    _BlendRate
+                );
             }
             ENDHLSL
         }

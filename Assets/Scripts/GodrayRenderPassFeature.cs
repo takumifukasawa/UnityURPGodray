@@ -262,14 +262,18 @@ class GodrayRenderPass : ScriptableRenderPass
                     return;
                 }
 
-                Debug.Log(_rtTempColor1.scaleFactor);
-
                 // if (cameraTarget != null && _rtTempColor != null)
                 // {
                 Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor1, _settings.BlitMaterial, 0);
-                Blitter.BlitCameraTexture(commandBuffer, _rtTempColor1, _rtTempColor2, _settings.BlitMaterial, 1);
-                Blitter.BlitCameraTexture(commandBuffer, _rtTempColor2, cameraTarget);
+                commandBuffer.SetGlobalTexture("_GodrayTexture", _rtTempColor1);
+                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor1, _rtTempColor2, _settings.BlitMaterial, 1);
+                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor2, cameraTarget);
+                Blitter.BlitCameraTexture(commandBuffer, cameraTarget, cameraTarget, _settings.BlitMaterial, 1);
                 // }
+               
+                // tmp
+                // Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor, _settings.BlitMaterial, 0);
+                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor, cameraTarget);
             }
         }
 
