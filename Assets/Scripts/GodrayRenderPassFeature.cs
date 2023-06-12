@@ -157,7 +157,8 @@ class GodrayRenderPass : ScriptableRenderPass
         var colorDesc = renderingData.cameraData.cameraTargetDescriptor;
         colorDesc.depthBufferBits = 0;
 
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.25f, 0.25f), colorDesc, name: "_TemporaryColorTexture1");
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, colorDesc, name: "_TemporaryColorTexture2");
 
         if (_settings.ColorTargetDestinationID != "")
@@ -260,6 +261,8 @@ class GodrayRenderPass : ScriptableRenderPass
                 {
                     return;
                 }
+
+                Debug.Log(_rtTempColor1.scaleFactor);
 
                 // if (cameraTarget != null && _rtTempColor != null)
                 // {
