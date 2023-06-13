@@ -30,6 +30,9 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
         [Header("Blit Settings")]
         public Material BlitMaterial;
 
+        [Range(0.1f, 1)]
+        public float DownScalingRate = 1f;
+
         [Header("Parameters")]
         [Range(0, 1)]
         public float BlendRate = 1;
@@ -157,9 +160,22 @@ class GodrayRenderPass : ScriptableRenderPass
         var colorDesc = renderingData.cameraData.cameraTargetDescriptor;
         colorDesc.depthBufferBits = 0;
 
+        var rtTempDesc1 = renderingData.cameraData.cameraTargetDescriptor;
+        rtTempDesc1.depthBufferBits = 0;
+        rtTempDesc1.colorFormat = RenderTextureFormat.ARGB32;
+
+        var rtTempDesc2 = renderingData.cameraData.cameraTargetDescriptor;
+        rtTempDesc2.depthBufferBits = 0;
+
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.25f, 0.25f), colorDesc, name: "_TemporaryColorTexture1");
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, colorDesc, name: "_TemporaryColorTexture2");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc2, name: "_TemporaryColorTexture2");
+
+        // Debug.Log("---------------------------");
+        // Debug.Log(renderingData.cameraData.renderer.cameraColorTargetHandle.rt.width);
+        // Debug.Log(renderingData.cameraData.renderer.cameraColorTargetHandle.rt.height);
+        // Debug.Log(_rtTempColor1.scaleFactor);
+        // Debug.Log(_rtTempColor1.GetScaledSize());
 
         if (_settings.ColorTargetDestinationID != "")
         {
@@ -270,7 +286,7 @@ class GodrayRenderPass : ScriptableRenderPass
                 // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor2, cameraTarget);
                 Blitter.BlitCameraTexture(commandBuffer, cameraTarget, cameraTarget, _settings.BlitMaterial, 1);
                 // }
-               
+
                 // tmp
                 // Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor, _settings.BlitMaterial, 0);
                 // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor, cameraTarget);

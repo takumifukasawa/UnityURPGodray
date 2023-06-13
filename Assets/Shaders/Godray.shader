@@ -209,6 +209,8 @@ Shader "Custom/Godray"
 
                 alpha *= _GlobalAlpha;
 
+                alpha = saturate(alpha);
+
                 // float s = SAMPLE_TEXTURE2D(_MainLightShadowmapTexture, sampler_LinearRepeat, IN.uv);
                 // return float4(s, s, s, 1.);
 
@@ -216,7 +218,7 @@ Shader "Custom/Godray"
                 // half4 destColor = half4(col.xyz, alpha);
                 
                 // half4 destColor = half4(_FogColor.xyz, alpha);
-                half4 destColor = half4(alpha, alpha, alpha, 1.);
+                half4 destColor = half4(1., 1., 1., alpha);
 
                 return destColor;
 
@@ -292,11 +294,12 @@ Shader "Custom/Godray"
             half4 frag(GodrayVaryings IN) : SV_Target
             {
                 half4 sceneColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
-                half4 godray = SAMPLE_TEXTURE2D(_GodrayTexture, sampler_LinearRepeat, IN.uv).x;
+                half4 godray = SAMPLE_TEXTURE2D(_GodrayTexture, sampler_LinearRepeat, IN.uv);
 
                 half3 blendColor = lerp(sceneColor.xyz, godray.xyz, godray.a);
 
-                return godray;
+                // return half4(godray.a, godray.a, godray.a, 1.);
+                // return sceneColor;
 
                 return lerp(
                     sceneColor,
