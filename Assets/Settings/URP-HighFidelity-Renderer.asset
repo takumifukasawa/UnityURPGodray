@@ -121,7 +121,7 @@ MonoBehaviour:
     BlitMaterial: {fileID: 2100000, guid: a4a4f63e1cd25044692be540f6d013c8, type: 2}
     DownScalingRate: 0.25
     BlendRate: 1
-    GlobalAlpha: 0.355
+    GlobalAlpha: 0.115
     FogColor: {r: 1, g: 1, b: 1, a: 1}
     AttenuationBase: 65
     AttenuationPower: 40.4

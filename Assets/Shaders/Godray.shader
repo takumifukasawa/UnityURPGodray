@@ -218,7 +218,8 @@ Shader "Custom/Godray"
                 // half4 destColor = half4(col.xyz, alpha);
                 
                 // half4 destColor = half4(_FogColor.xyz, alpha);
-                half4 destColor = half4(1., 1., 1., alpha);
+                // half4 destColor = half4(1., 1., 1., alpha);
+                half4 destColor = half4(alpha, 1, 1, 1);
 
                 return destColor;
 
@@ -273,6 +274,7 @@ Shader "Custom/Godray"
             float4 _MainTex_ST;
             float4 _GodrayTexture_ST;
             float _BlendRate;
+            half4 _FogColor;
             CBUFFER_END
 
             GodrayVaryings vert(GodrayAttributes IN)
@@ -296,7 +298,8 @@ Shader "Custom/Godray"
                 half4 sceneColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
                 half4 godray = SAMPLE_TEXTURE2D(_GodrayTexture, sampler_LinearRepeat, IN.uv);
 
-                half3 blendColor = lerp(sceneColor.xyz, godray.xyz, godray.a);
+                // half3 blendColor = lerp(sceneColor.xyz, godray.xyz, godray.x);
+                half3 blendColor = lerp(sceneColor.xyz, _FogColor.xyz, godray.x);
 
                 // return half4(godray.a, godray.a, godray.a, 1.);
                 // return sceneColor;

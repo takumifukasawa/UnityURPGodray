@@ -162,7 +162,7 @@ class GodrayRenderPass : ScriptableRenderPass
 
         var rtTempDesc1 = renderingData.cameraData.cameraTargetDescriptor;
         rtTempDesc1.depthBufferBits = 0;
-        rtTempDesc1.colorFormat = RenderTextureFormat.ARGB32;
+        rtTempDesc1.colorFormat = RenderTextureFormat.R8;
 
         var rtTempDesc2 = renderingData.cameraData.cameraTargetDescriptor;
         rtTempDesc2.depthBufferBits = 0;
