@@ -128,6 +128,7 @@ Shader "Custom/Godray"
             float _RayJitterSizeY;
             float _AttenuationBase;
             float _AttenuationPower;
+            // int _MaxIterationNum;
             CBUFFER_END
 
             // https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
@@ -178,22 +179,35 @@ Shader "Custom/Godray"
                 float rayJitter = noise(IN.uv + _Time.x) * 2. - 1.;
 
                 float3 rayOriginInView = float3(rayJitter * _RayJitterSizeX, rayJitter * _RayJitterSizeY, 0);
+                
                 // pattern_1
                 // float3 rayOriginInWorld = _WorldSpaceCameraPos;
                 // pattern_2
-                float3 rayOriginInWorld = mul(_InverseViewMatrix, float4(rayOriginInView, 1.));
+                float3 rayOriginInWorld = mul(_InverseViewMatrix, float4(rayOriginInView.xyz, 1.));
 
                 float3 rayEndPositionInWorld = ReconstructWorldPositionFromDepth(IN.uv, rawDepth);
                 float3 rayDir = normalize(rayEndPositionInWorld - rayOriginInWorld);
 
                 float alpha = 0.;
 
-                // return float4(rayDir, 1.);
+                float rayStep = length(rayEndPositionInWorld - rayOriginInWorld) / float(maxIterationNum);
+                rayStep = min(rayStep, _RayStep);
+                rayStep = _RayStep;
 
                 for (int i = 0; i < maxIterationNum; i++)
+                // for (int i = 0; i < _MaxIterationNum; i++)
                 {
-                    float3 currentRayStep = rayDir * (_RayStep * i);
+                    // float3 currentRayStep = rayDir * (rayStep * i);
+                    float3 currentRayStep = rayDir * (rayStep * i);
                     float3 currentRayInWorld = rayOriginInWorld + currentRayStep + _RayNearOffset;
+
+                    // float distanceOfCameraToRayEndInWorld = length(rayEndPositionInWorld - _WorldSpaceCameraPos);
+                    // float distanceOfCameraToCurrentRayInWorld = length(currentRayInWorld - _WorldSpaceCameraPos);
+
+                    // if(distanceOfCameraToCurrentRayInWorld > distanceOfCameraToRayEndInWorld)
+                    // {
+                    //     break;
+                    // }
 
                     half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(currentRayInWorld));
 
@@ -209,7 +223,7 @@ Shader "Custom/Godray"
 
                 alpha *= _GlobalAlpha;
 
-                alpha = saturate(alpha);
+                // alpha = saturate(alpha);
 
                 // float s = SAMPLE_TEXTURE2D(_MainLightShadowmapTexture, sampler_LinearRepeat, IN.uv);
                 // return float4(s, s, s, 1.);

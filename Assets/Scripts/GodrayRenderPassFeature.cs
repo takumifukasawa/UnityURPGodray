@@ -49,16 +49,19 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
         public float AttenuationPower = 1;
 
         [Header("Ray")]
+        // [Range(1, 128)]
+        // public int MaxIterationNum = 64;
+        
         [Range(0, 5)]
         public float RayStep = 0.1f;
 
         [Range(0, 5)]
         public float RayNearOffset = 0.01f;
 
-        [Range(0, 0.05f)]
+        [Range(0, 0.01f)]
         public float RayJitterSizeX = 0.005f;
 
-        [Range(0, 0.05f)]
+        [Range(0, 0.01f)]
         public float RayJitterSizeY = 0.005f;
     }
 
@@ -167,8 +170,8 @@ class GodrayRenderPass : ScriptableRenderPass
         var rtTempDesc2 = renderingData.cameraData.cameraTargetDescriptor;
         rtTempDesc2.depthBufferBits = 0;
 
-        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc2, name: "_TemporaryColorTexture2");
 
         // Debug.Log("---------------------------");
@@ -240,8 +243,9 @@ class GodrayRenderPass : ScriptableRenderPass
 
             var projectionMatrix = renderingData.cameraData.camera.projectionMatrix;
             var viewMatrix = renderingData.cameraData.camera.worldToCameraMatrix;
+            var viewProjectionMatrix = projectionMatrix * viewMatrix;
             var inverseViewMatrix = viewMatrix.inverse;
-            var inverseViewProjectionMatrix = (projectionMatrix * viewMatrix).inverse;
+            var inverseViewProjectionMatrix = viewProjectionMatrix.inverse;
             var inverseProjectionMatrix = projectionMatrix.inverse;
 
             _settings.BlitMaterial.SetFloat("_BlendRate", _settings.BlendRate);
@@ -256,6 +260,7 @@ class GodrayRenderPass : ScriptableRenderPass
             _settings.BlitMaterial.SetFloat("_RayJitterSizeY", _settings.RayJitterSizeY);
             _settings.BlitMaterial.SetFloat("_AttenuationBase", _settings.AttenuationBase);
             _settings.BlitMaterial.SetFloat("_AttenuationPower", _settings.AttenuationPower);
+            // _settings.BlitMaterial.SetInt("_MaxIterationNum", _settings.MaxIterationNum);
 
             //
             // end setup material
