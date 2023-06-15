@@ -171,7 +171,8 @@ class GodrayRenderPass : ScriptableRenderPass
         rtTempDesc2.depthBufferBits = 0;
 
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
+        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.5f, 0.5f), rtTempDesc1, name: "_TemporaryColorTexture1");
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc2, name: "_TemporaryColorTexture2");
 
         // Debug.Log("---------------------------");
