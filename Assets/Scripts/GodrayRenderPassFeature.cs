@@ -119,8 +119,6 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
 /// </summary>
 class GodrayRenderPass : ScriptableRenderPass
 {
-    // private const string PROFILER_TAG = nameof(GodrayRenderPass);
-
     private Material _material;
     private RTHandle _cameraColorTarget;
     private RTHandle _cameraDepthTarget;
@@ -170,17 +168,12 @@ class GodrayRenderPass : ScriptableRenderPass
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(1f, 1f), colorDesc, name: "_TemporaryColorTexture1");
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
         // 1/2 ダウンサンプルする場合
+        // TODO: scale factor を渡すと initialize エラーになるときがある
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.5f, 0.5f), colorDesc, name: "_TemporaryColorTexture1");
         // 可変にする場合
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
         
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc1, name: "_TemporaryColorTexture2");
-
-        // Debug.Log("---------------------------");
-        // Debug.Log(renderingData.cameraData.renderer.cameraColorTargetHandle.rt.width);
-        // Debug.Log(renderingData.cameraData.renderer.cameraColorTargetHandle.rt.height);
-        // Debug.Log(_rtTempColor1.scaleFactor);
-        // Debug.Log(_rtTempColor1.GetScaledSize());
 
         if (_settings.ColorTargetDestinationID != "")
         {
@@ -231,14 +224,6 @@ class GodrayRenderPass : ScriptableRenderPass
             context.ExecuteCommandBuffer(commandBuffer);
             commandBuffer.Clear();
 
-            // var soringCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
-            // var drawingSettings = CreateDrawingSettings(_shaderTagsList, ref renderingData, soringCriteria);
-            // if (_settings.OverrideMaterial != null)
-            // {
-            //     drawingSettings.overrideMaterialPassIndex = _settings.OverrideMaterialPass;
-            //     drawingSettings.overrideMaterial = _settings.OverrideMaterial;
-            // }
-
             //
             // setup material
             //
@@ -249,30 +234,23 @@ class GodrayRenderPass : ScriptableRenderPass
             var inverseViewMatrix = viewMatrix.inverse;
             var inverseViewProjectionMatrix = viewProjectionMatrix.inverse;
             var inverseProjectionMatrix = projectionMatrix.inverse;
-            var frustumCorners = GetFrustumCorners(renderingData.cameraData.camera);
 
             _settings.BlitMaterial.SetFloat("_BlendRate", _settings.BlendRate);
             _settings.BlitMaterial.SetFloat("_GlobalAlpha", _settings.GlobalAlpha);
             _settings.BlitMaterial.SetColor("_FogColor", _settings.FogColor);
-            _settings.BlitMaterial.SetMatrix("_CameraViewMatrix", viewMatrix);
             _settings.BlitMaterial.SetMatrix("_InverseViewMatrix", inverseViewMatrix);
             _settings.BlitMaterial.SetMatrix("_InverseProjectionMatrix", inverseProjectionMatrix);
             _settings.BlitMaterial.SetMatrix("_InverseViewProjectionMatrix", inverseViewProjectionMatrix);
-            _settings.BlitMaterial.SetMatrix("_FrustumCorners", frustumCorners);
             _settings.BlitMaterial.SetFloat("_RayStep", _settings.RayStep);
             _settings.BlitMaterial.SetFloat("_RayNearOffset", _settings.RayNearOffset);
             _settings.BlitMaterial.SetFloat("_RayJitterSizeX", _settings.RayJitterSizeX);
             _settings.BlitMaterial.SetFloat("_RayJitterSizeY", _settings.RayJitterSizeY);
             _settings.BlitMaterial.SetFloat("_AttenuationBase", _settings.AttenuationBase);
             _settings.BlitMaterial.SetFloat("_AttenuationPower", _settings.AttenuationPower);
-            // _settings.BlitMaterial.SetInt("_MaxIterationNum", _settings.MaxIterationNum);
 
             //
             // end setup material
             //
-
-            // post process の場合はいらない
-            // context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref _filteringSettings);
 
             if (_settings.ColorTargetDestinationID != "")
             {
@@ -288,41 +266,15 @@ class GodrayRenderPass : ScriptableRenderPass
                     return;
                 }
 
-                // if (cameraTarget != null && _rtTempColor != null)
-                // {
                 Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor1, _settings.BlitMaterial, 0);
                 commandBuffer.SetGlobalTexture("_GodrayTexture", _rtTempColor1);
-                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor1, _rtTempColor2, _settings.BlitMaterial, 1);
-                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor2, cameraTarget);
                 Blitter.BlitCameraTexture(commandBuffer, cameraTarget, cameraTarget, _settings.BlitMaterial, 1);
-                // }
-
-                // tmp
-                // Blitter.BlitCameraTexture(commandBuffer, cameraTarget, _rtTempColor, _settings.BlitMaterial, 0);
-                // Blitter.BlitCameraTexture(commandBuffer, _rtTempColor, cameraTarget);
             }
         }
 
         context.ExecuteCommandBuffer(commandBuffer);
         commandBuffer.Clear();
         CommandBufferPool.Release(commandBuffer);
-
-        // Blitter.BlitCameraTexture(commandBuffer, _cameraColorTarget, _cameraColorTarget, _material, 0);
-        // context.ExecuteCommandBuffer(commandBuffer);
-        // CommandBufferPool.Release(commandBuffer);
-
-        // var cameraData = renderingData.cameraData;
-        // var w = cameraData.camera.scaledPixelWidth;
-        // var h = cameraData.camera.scaledPixelHeight;
-        // 
-        // commandBuffer.GetTemporaryRT(RENDER_TEXTURE_ID, w, h, 0, FilterMode.Point, RenderTextureFormat.Default);
-        // commandBuffer.Blit(_currentRenderTargetIdentifier, RENDER_TEXTURE_ID);
-        // commandBuffer.Blit(RENDER_TEXTURE_ID, _currentRenderTargetIdentifier);
-
-        // context.ExecuteCommandBuffer(commandBuffer);
-        // context.Submit();
-        // 
-        // CommandBufferPool.Release(commandBuffer);
     }
 
     /// <summary>
@@ -337,33 +289,5 @@ class GodrayRenderPass : ScriptableRenderPass
 
         _rtTempColor1?.Release();
         _rtTempColor2?.Release();
-    }
-    
-    /// <summary>
-    /// 
-    /// ref: http://hventura.com/unity-post-process-v2-raymarching.html
-    /// </summary>
-    /// <param name="camera"></param>
-    /// <returns></returns>
-    private Matrix4x4 GetFrustumCorners(Camera camera)
-    {
-        var cameraTransform = camera.transform;
-
-        var frustumCorners = new Vector3[4];
-        camera.CalculateFrustumCorners(new Rect(0, 0, 1, 1),
-            camera.farClipPlane, camera.stereoActiveEye, frustumCorners);
-
-        var frustumVectorsArray = Matrix4x4.identity;
-
-        frustumVectorsArray.SetRow(0, cameraTransform.TransformVector(frustumCorners[0]));
-        frustumVectorsArray.SetRow(1, cameraTransform.TransformVector(frustumCorners[3]));
-        frustumVectorsArray.SetRow(2, cameraTransform.TransformVector(frustumCorners[1]));
-        frustumVectorsArray.SetRow(3, cameraTransform.TransformVector(frustumCorners[2]));
-        // frustumVectorsArray.SetRow(0, frustumCorners[0]);
-        // frustumVectorsArray.SetRow(1, frustumCorners[3]);
-        // frustumVectorsArray.SetRow(2, frustumCorners[1]);
-        // frustumVectorsArray.SetRow(3, frustumCorners[2]);
-            
-        return frustumVectorsArray;
     }
 }

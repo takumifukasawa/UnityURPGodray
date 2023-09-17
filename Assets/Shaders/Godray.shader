@@ -111,7 +111,6 @@ Shader "Custom/Godray"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
-            // TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sample_CameraDepthTexture);
 
             CBUFFER_START(UnityPerMaterial)
@@ -120,7 +119,6 @@ Shader "Custom/Godray"
             float _BlendRate;
             float _GlobalAlpha;
             half4 _FogColor;
-            float4x4 _CameraViewMatrix;
             float4x4 _InverseViewMatrix;
             float4x4 _InverseViewProjectionMatrix;
             float4x4 _InverseProjectionMatrix;
@@ -141,26 +139,9 @@ Shader "Custom/Godray"
                 return frac(sin(dot(seed, float2(12.9898, 78.233))) * 43758.5453);
             }
 
-            // float3 ReconstructWorldPositionFromDepth(float2 screenUV, float rawDepth)
-            // {
-            //     // TODO: depthはgraphicsAPIを考慮している必要がある?
-            //     float4 clipPos = float4(screenUV * 2.0 - 1.0, rawDepth, 1.0);
-            //     // TODO: urpではなくても問題ない？
-            //     // #if UNITY_UV_STARTS_AT_TOP
-            //     // clipPos.y = -clipPos.y;
-            //     // #endif
-            //     float4 worldPos = mul(_InverseViewProjectionMatrix, clipPos);
-            //     return worldPos.xyz / worldPos.w;
-            // }
-
             float3 ReconstructViewPositionFromDepth(float2 screenUV, float rawDepth)
             {
-                // TODO: depthはgraphicsAPIを考慮している必要がある?
                 float4 clipPos = float4(screenUV * 2.0 - 1.0, rawDepth, 1.0);
-                // TODO: urpではなくても問題ない？
-                // #if UNITY_UV_STARTS_AT_TOP
-                // clipPos.y = -clipPos.y;
-                // #endif
                 float4 viewPos = mul(_InverseProjectionMatrix, clipPos);
                 return viewPos.xyz / viewPos.w;
             }
@@ -202,51 +183,25 @@ Shader "Custom/Godray"
                 float3 rayOffset = float3(rayJitter * _RayJitterSizeX, rayJitter * _RayJitterSizeY, 0);
                 float3 rayOriginInView = rayOffset;
                 
-                // pattern_1
-                // float3 rayOriginInWorld = _WorldSpaceCameraPos;
-                // pattern_2
-                // original
-                // float3 rayOriginInWorld = mul(_InverseViewMatrix, float4(rayOriginInView.xyz, 1.));
-
-                // original
-                // float3 rayEndPositionInWorld = ReconstructWorldPositionFromDepth(IN.uv, rawDepth);
                 float3 rayEndPositionInView = ReconstructViewPositionFromDepth(IN.uv, rawDepth) + rayOffset;
-                // float3 rayEndPositionInView = LinearEyeDepth(rawDepth, _ZBufferParams);
-                // float3 rayDir = normalize(rayEndPositionInWorld - rayOriginInWorld);
-                // tmp
                 float3 rayDirInView = normalize(rayEndPositionInView - rayOriginInView);
-                // float rayDirInView = normalize(mul(_CameraViewMatrix, float4(IN.ray.xyz, 1.)));
-                // return half4(rayDirInView, 1.);
 
                 float alpha = 0.;
 
                 float rayStep = length(rayEndPositionInView - rayOriginInView) / float(maxIterationNum);
-                rayStep = min(rayStep, _RayStep);
+                // rayStep = min(rayStep, _RayStep);
                 rayStep = _RayStep;
 
                 for (int i = 0; i < maxIterationNum; i++)
-                // for (int i = 0; i < _MaxIterationNum; i++)
                 {
-                    // float3 currentRayStep = rayDir * (rayStep * i);
                     float3 currentRayStep = rayDirInView * (rayStep * i);
                     float3 currentRayInView = rayOriginInView + currentRayStep + _RayNearOffset;
 
-                    // float distanceOfCameraToRayEndInWorld = length(rayEndPositionInWorld - _WorldSpaceCameraPos);
-                    // float distanceOfCameraToCurrentRayInWorld = length(currentRayInWorld - _WorldSpaceCameraPos);
-
-                    // if(distanceOfCameraToCurrentRayInWorld > distanceOfCameraToRayEndInWorld)
-                    // {
-                    //     break;
-                    // }
-
-                    // half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(currentRayInView));
                     half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(mul(_InverseViewMatrix, float4(currentRayInView, 1.))));
                     // こちらでもよい
                     // half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(mul(UNITY_MATRIX_I_V, float4(currentRayInView, 1.))));
-                    
 
                     if (shadow >= 1.)
-                    // if (shadow >= 0.)
                     {
                         alpha += (1. / _AttenuationBase);
                     }
@@ -258,27 +213,9 @@ Shader "Custom/Godray"
 
                 alpha *= _GlobalAlpha;
 
-                // alpha = saturate(alpha);
-
-                // float s = SAMPLE_TEXTURE2D(_MainLightShadowmapTexture, sampler_LinearRepeat, IN.uv);
-                // return float4(s, s, s, 1.);
-
-                // half4 destColor = half4(lerp(col.xyz, _FogColor.xyz, alpha), 1.);
-                // half4 destColor = half4(col.xyz, alpha);
-                
-                // half4 destColor = half4(_FogColor.xyz, alpha);
-                // half4 destColor = half4(1., 1., 1., alpha);
                 half4 destColor = half4(alpha, 1, 1, 1);
 
                 return destColor;
-
-                // return lerp(
-                //     col,
-                //     // half4(col.xyz, 1),
-                //     // half4(alpha, alpha, alpha, 1.),
-                //     destColor,
-                //     _BlendRate
-                // );
             }
             ENDHLSL
         }
