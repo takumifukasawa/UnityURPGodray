@@ -199,7 +199,8 @@ Shader "Custom/Godray"
 
                 float rayJitter = noise(IN.uv + _Time.x) * 2. - 1.;
 
-                float3 rayOriginInView = float3(rayJitter * _RayJitterSizeX, rayJitter * _RayJitterSizeY, 0);
+                float3 rayOffset = float3(rayJitter * _RayJitterSizeX, rayJitter * _RayJitterSizeY, 0);
+                float3 rayOriginInView = rayOffset;
                 
                 // pattern_1
                 // float3 rayOriginInWorld = _WorldSpaceCameraPos;
@@ -209,7 +210,7 @@ Shader "Custom/Godray"
 
                 // original
                 // float3 rayEndPositionInWorld = ReconstructWorldPositionFromDepth(IN.uv, rawDepth);
-                float3 rayEndPositionInView = ReconstructViewPositionFromDepth(IN.uv, rawDepth);
+                float3 rayEndPositionInView = ReconstructViewPositionFromDepth(IN.uv, rawDepth) + rayOffset;
                 // float3 rayEndPositionInView = LinearEyeDepth(rawDepth, _ZBufferParams);
                 // float3 rayDir = normalize(rayEndPositionInWorld - rayOriginInWorld);
                 // tmp

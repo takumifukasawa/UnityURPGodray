@@ -58,10 +58,10 @@ public class GodrayRenderPassFeature : ScriptableRendererFeature
         [Range(0, 5)]
         public float RayNearOffset = 0.01f;
 
-        [Range(0, 0.01f)]
+        [Range(0, 0.2f)]
         public float RayJitterSizeX = 0.005f;
 
-        [Range(0, 0.01f)]
+        [Range(0, 0.2f)]
         public float RayJitterSizeY = 0.005f;
     }
 
@@ -165,19 +165,16 @@ class GodrayRenderPass : ScriptableRenderPass
 
         var rtTempDesc1 = renderingData.cameraData.cameraTargetDescriptor;
         rtTempDesc1.depthBufferBits = 0;
-        rtTempDesc1.colorFormat = RenderTextureFormat.R8;
-
-        var rtTempDesc2 = renderingData.cameraData.cameraTargetDescriptor;
-        rtTempDesc2.depthBufferBits = 0;
 
         // 等倍
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(1f, 1f), colorDesc, name: "_TemporaryColorTexture1");
+        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(1f, 1f), colorDesc, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
         // 1/2 ダウンサンプルする場合
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.5f, 0.5f), colorDesc, name: "_TemporaryColorTexture1");
         // 可変にする場合
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
         
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc2, name: "_TemporaryColorTexture2");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc1, name: "_TemporaryColorTexture2");
 
         // Debug.Log("---------------------------");
         // Debug.Log(renderingData.cameraData.renderer.cameraColorTargetHandle.rt.width);

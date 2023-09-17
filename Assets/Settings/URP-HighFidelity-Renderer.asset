@@ -122,11 +122,11 @@ MonoBehaviour:
     ColorTargetDestinationID: 
     BlitMaterial: {fileID: 2100000, guid: a4a4f63e1cd25044692be540f6d013c8, type: 2}
     BlendRate: 1
-    GlobalAlpha: 0.676
+    GlobalAlpha: 0.44
     FogColor: {r: 1, g: 1, b: 1, a: 1}
-    AttenuationBase: 78.8
-    AttenuationPower: 11.1
-    RayStep: 0.25
+    AttenuationBase: 74.3
+    AttenuationPower: 17.8
+    RayStep: 0.27
     RayNearOffset: 0
-    RayJitterSizeX: 0
-    RayJitterSizeY: 0
+    RayJitterSizeX: 0.054
+    RayJitterSizeY: 0.0573
