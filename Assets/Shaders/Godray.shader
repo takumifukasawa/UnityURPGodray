@@ -104,8 +104,9 @@ Shader "Custom/Godray"
 
             struct GodrayVaryings
             {
-                float2 uv : TEXCOORD0;
                 float4 positionHCS : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                float4 ray : TEXCOORD1;
             };
 
             TEXTURE2D(_MainTex);
@@ -119,9 +120,11 @@ Shader "Custom/Godray"
             float _BlendRate;
             float _GlobalAlpha;
             half4 _FogColor;
+            float4x4 _CameraViewMatrix;
             float4x4 _InverseViewMatrix;
             float4x4 _InverseViewProjectionMatrix;
             float4x4 _InverseProjectionMatrix;
+            float4x4 _FrustumCorners;
             float _RayStep;
             float _RayNearOffset;
             float _RayBinaryStep;
@@ -175,6 +178,7 @@ Shader "Custom/Godray"
 
                 OUT.positionHCS = pos;
                 OUT.uv = uv;
+                OUT.ray = _FrustumCorners[uv.x + 2 * uv.y];
                 return OUT;
             }
 
@@ -208,7 +212,10 @@ Shader "Custom/Godray"
                 float3 rayEndPositionInView = ReconstructViewPositionFromDepth(IN.uv, rawDepth);
                 // float3 rayEndPositionInView = LinearEyeDepth(rawDepth, _ZBufferParams);
                 // float3 rayDir = normalize(rayEndPositionInWorld - rayOriginInWorld);
+                // tmp
                 float3 rayDirInView = normalize(rayEndPositionInView - rayOriginInView);
+                // float rayDirInView = normalize(mul(_CameraViewMatrix, float4(IN.ray.xyz, 1.)));
+                // return half4(rayDirInView, 1.);
 
                 float alpha = 0.;
 
@@ -233,6 +240,9 @@ Shader "Custom/Godray"
 
                     // half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(currentRayInView));
                     half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(mul(_InverseViewMatrix, float4(currentRayInView, 1.))));
+                    // こちらでもよい
+                    // half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(mul(UNITY_MATRIX_I_V, float4(currentRayInView, 1.))));
+                    
 
                     if (shadow >= 1.)
                     // if (shadow >= 0.)
@@ -336,17 +346,9 @@ Shader "Custom/Godray"
                 half4 sceneColor = SAMPLE_TEXTURE2D(_BlitTexture, sampler_LinearRepeat, IN.uv);
                 half4 godray = SAMPLE_TEXTURE2D(_GodrayTexture, sampler_LinearRepeat, IN.uv);
 
-                // half3 blendColor = lerp(sceneColor.xyz, godray.xyz, godray.x);
-                half3 blendColor = lerp(sceneColor.xyz, _FogColor.xyz, godray.x);
+                half3 blendColor = lerp(sceneColor.xyz, _FogColor.xyz, godray.x * _BlendRate);
 
-                // return half4(godray.a, godray.a, godray.a, 1.);
-                // return sceneColor;
-
-                return lerp(
-                    sceneColor,
-                    half4(blendColor, 1.),
-                    _BlendRate
-                );
+                return half4(blendColor, 1.);
             }
             ENDHLSL
         }
