@@ -26,6 +26,7 @@ Shader "Custom/Godray"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
             // #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
             // TODO: fix keywords
@@ -109,7 +110,7 @@ Shader "Custom/Godray"
 
             TEXTURE2D(_MainTex);
             SAMPLER(sampler_MainTex);
-            TEXTURE2D(_CameraDepthTexture);
+            // TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sample_CameraDepthTexture);
 
             CBUFFER_START(UnityPerMaterial)
@@ -173,8 +174,12 @@ Shader "Custom/Godray"
 
                 int maxIterationNum = 64;
 
+                float2 uv = IN.positionHCS.xy / _ScaledScreenParams.xy;
+                
                 float rawDepth = SAMPLE_TEXTURE2D(_CameraDepthTexture, sampler_LinearRepeat, IN.uv);
-                float depth = Linear01Depth(rawDepth, _ZBufferParams);
+                #if UNITY_REVERSED_Z
+                    rawDepth = 1.0f - rawDepth;
+                #endif
 
                 float rayJitter = noise(IN.uv + _Time.x) * 2. - 1.;
 
@@ -183,10 +188,23 @@ Shader "Custom/Godray"
                 // pattern_1
                 // float3 rayOriginInWorld = _WorldSpaceCameraPos;
                 // pattern_2
+                // original
                 float3 rayOriginInWorld = mul(_InverseViewMatrix, float4(rayOriginInView.xyz, 1.));
+                // edit
+                // float3 rayOriginInWorld = ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
+                // float3 rayOriginInWorld = ComputeWorldSpacePosition(uv, depth, _InverseViewProjectionMatrix);
 
+                // original
                 float3 rayEndPositionInWorld = ReconstructWorldPositionFromDepth(IN.uv, rawDepth);
+                // edit
+                // float3 rayEndPositionInWorld = ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
+                // float3 rayEndPositionInWorld = ComputeWorldSpacePosition(uv, depth, _InverseViewProjectionMatrix);
                 float3 rayDir = normalize(rayEndPositionInWorld - rayOriginInWorld);
+
+                // return float4(ComputeViewSpacePosition(uv, depth, UNITY_MATRIX_I_P), 1.);
+                // return float4(ComputeViewSpacePosition(uv, depth, _InverseProjectionMatrix), 1.);
+                // return float4(ComputeViewSpacePosition(IN.uv, depth, _InverseProjectionMatrix), 1.);
+                // return float4(IN.uv, 1., 1.);
 
                 float alpha = 0.;
 
@@ -234,7 +252,7 @@ Shader "Custom/Godray"
                 // half4 destColor = half4(_FogColor.xyz, alpha);
                 // half4 destColor = half4(1., 1., 1., alpha);
                 half4 destColor = half4(alpha, 1, 1, 1);
-
+                
                 return destColor;
 
                 // return lerp(

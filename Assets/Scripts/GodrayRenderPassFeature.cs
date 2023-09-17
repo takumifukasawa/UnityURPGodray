@@ -170,7 +170,8 @@ class GodrayRenderPass : ScriptableRenderPass
         var rtTempDesc2 = renderingData.cameraData.cameraTargetDescriptor;
         rtTempDesc2.depthBufferBits = 0;
 
-        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, colorDesc, name: "_TemporaryColorTexture1");
+        RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(0.5f, 0.5f), colorDesc, name: "_TemporaryColorTexture1");
         // RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor1, new Vector2(_settings.DownScalingRate, _settings.DownScalingRate), rtTempDesc1, name: "_TemporaryColorTexture1");
         RenderingUtils.ReAllocateIfNeeded(ref _rtTempColor2, rtTempDesc2, name: "_TemporaryColorTexture2");
 
@@ -229,13 +230,13 @@ class GodrayRenderPass : ScriptableRenderPass
             context.ExecuteCommandBuffer(commandBuffer);
             commandBuffer.Clear();
 
-            var soringCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
-            var drawingSettings = CreateDrawingSettings(_shaderTagsList, ref renderingData, soringCriteria);
-            if (_settings.OverrideMaterial != null)
-            {
-                drawingSettings.overrideMaterialPassIndex = _settings.OverrideMaterialPass;
-                drawingSettings.overrideMaterial = _settings.OverrideMaterial;
-            }
+            // var soringCriteria = renderingData.cameraData.defaultOpaqueSortFlags;
+            // var drawingSettings = CreateDrawingSettings(_shaderTagsList, ref renderingData, soringCriteria);
+            // if (_settings.OverrideMaterial != null)
+            // {
+            //     drawingSettings.overrideMaterialPassIndex = _settings.OverrideMaterialPass;
+            //     drawingSettings.overrideMaterial = _settings.OverrideMaterial;
+            // }
 
             //
             // setup material

@@ -75,6 +75,8 @@ MonoBehaviour:
       type: 3}
     objectMotionVector: {fileID: 4800000, guid: 7b3ede40266cd49a395def176e1bc486,
       type: 3}
+    dataDrivenLensFlare: {fileID: 4800000, guid: 6cda457ac28612740adb23da5d39ea92,
+      type: 3}
   m_AssetVersion: 2
   m_OpaqueLayerMask:
     serializedVersion: 2
@@ -121,11 +123,11 @@ MonoBehaviour:
     BlitMaterial: {fileID: 2100000, guid: a4a4f63e1cd25044692be540f6d013c8, type: 2}
     DownScalingRate: 1
     BlendRate: 1
-    GlobalAlpha: 1
+    GlobalAlpha: 0.887
     FogColor: {r: 1, g: 1, b: 1, a: 1}
-    AttenuationBase: 65
-    AttenuationPower: 40.4
-    RayStep: 0.14
-    RayNearOffset: 0.001
+    AttenuationBase: 68.6
+    AttenuationPower: 42.6
+    RayStep: 0.2
+    RayNearOffset: 0
     RayJitterSizeX: 0
     RayJitterSizeY: 0
