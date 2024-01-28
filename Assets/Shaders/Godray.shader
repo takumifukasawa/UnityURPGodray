@@ -194,8 +194,8 @@ Shader "Custom/Godray"
 
                 for (int i = 0; i < maxIterationNum; i++)
                 {
-                    float3 currentRayStep = rayDirInView * (rayStep * i);
-                    float3 currentRayInView = rayOriginInView + currentRayStep + _RayNearOffset;
+                    float3 currentRayStep = rayDirInView * (rayStep * i + _RayNearOffset);
+                    float3 currentRayInView = rayOriginInView + currentRayStep;
 
                     half shadow = MainLightRealtimeShadow(TransformWorldToShadowCoord(mul(_InverseViewMatrix, float4(currentRayInView, 1.))));
                     // こちらでもよい
